@@ -3,7 +3,9 @@ package main
 import (
 	"log/slog"
 	"os"
+	"strconv"
 
+	"github.com/bbfh-dev/go-tools/tools/terr"
 	"github.com/bbfh-dev/parsex/parsex"
 	"github.com/bbfh-dev/plog/plog"
 )
@@ -22,12 +24,16 @@ func Program(in parsex.Input, args ...string) error {
 		plog.SetupDefault(slog.LevelInfo)
 	}
 
-	return nil
+	port, err := strconv.Atoi(in.Default("port", "8080"))
+	if err != nil {
+		return err
+	}
 }
 
 var CLI = parsex.New("example", Program, []parsex.Arg{
 	{Name: "version", Match: "--AUTO,-v", Desc: "print version and exit"},
 	{Name: "debug", Match: "--AUTO", Desc: "log verbose debug information"},
+	{Name: "port", Match: "--AUTO,-p", Desc: "port to be used by HTTP server (Default: 8080)"},
 })
 
 func main() {
