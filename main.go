@@ -8,6 +8,7 @@ import (
 	"github.com/bbfh-dev/go-tools/tools/terr"
 	"github.com/bbfh-dev/parsex/parsex"
 	"github.com/bbfh-dev/plog/plog"
+	"github.com/tuxle-org/server/web"
 )
 
 var Version string
@@ -28,6 +29,8 @@ func Program(in parsex.Input, args ...string) error {
 	if err != nil {
 		return err
 	}
+
+	return terr.Prefix("Running HTTP server", web.ServeHTTP(port))
 }
 
 var CLI = parsex.New("example", Program, []parsex.Arg{
