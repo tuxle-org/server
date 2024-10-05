@@ -1,5 +1,5 @@
 VERSION := v0.1.0
-BINARY_NAME := unknown
+BINARY_NAME := tuxle
 
 run:
 	@go run -ldflags "-X main.Version=$(VERSION)" main.go $(ARGS)
