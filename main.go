@@ -59,7 +59,7 @@ func openDB() error {
 		return terr.Prefix("Making tuxle dirs", err)
 	}
 
-	db, err := gorm.Open(sqlite.Open(tuxle.DbFile), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(tuxle.DbFile), new(gorm.Config))
 	if err != nil {
 		return terr.Prefix("Opening database", err)
 	}
