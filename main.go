@@ -8,7 +8,11 @@ import (
 	"github.com/bbfh-dev/go-tools/tools/terr"
 	"github.com/bbfh-dev/parsex/parsex"
 	"github.com/bbfh-dev/plog/plog"
+	"github.com/tuxle-org/lib/tuxle/entities"
+	"github.com/tuxle-org/server/tuxle"
 	"github.com/tuxle-org/server/web"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 var Version string
@@ -27,6 +31,10 @@ func Program(in parsex.Input, args ...string) error {
 
 	port, err := strconv.Atoi(in.Default("port", "8080"))
 	if err != nil {
+		return terr.Prefix("Converting port argument into number", err)
+	}
+
+	if err = openDB(); err != nil {
 		return err
 	}
 
@@ -44,4 +52,33 @@ func main() {
 		slog.Error(err.Error())
 		os.Exit(1)
 	}
+}
+
+func openDB() error {
+	if err := tuxle.MakeDirs(); err != nil {
+		return terr.Prefix("Making tuxle dirs", err)
+	}
+
+	db, err := gorm.Open(sqlite.Open(tuxle.DbFile), &gorm.Config{})
+	if err != nil {
+		return terr.Prefix("Opening database", err)
+	}
+
+	err = db.AutoMigrate(
+		new(entities.PermissionMask),
+		new(entities.Tag),
+		new(entities.Role),
+		new(entities.User),
+		new(entities.Channel),
+		new(entities.Server),
+		new(entities.Directory),
+		new(entities.MessageVote),
+		new(entities.TextMessage),
+	)
+	if err != nil {
+		return terr.Prefix("Running migrations", err)
+	}
+
+	slog.Info("Opened database", "file", tuxle.DbFile)
+	return nil
 }
