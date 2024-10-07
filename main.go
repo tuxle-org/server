@@ -91,18 +91,6 @@ func openDB() (*gorm.DB, error) {
 func setupDB(db *gorm.DB) error {
 	slog.Debug("Ensuring default Server configuration exists...")
 
-	var server = entities.Server{
-		Name:        "Unnamed Server",
-		Description: "Welcome!",
-		Rules:       "",
-		IconURI:     nil,
-		BannerURI:   nil,
-		OwnerId:     0,
-		Region:      "US:en",
-	}
-	if err := db.FirstOrCreate(&server).Error; err != nil {
-		return terr.Prefix("SELECT Server", err)
-	}
-
-	return nil
+	_, err := tuxle.ServerInfo(db)
+	return err
 }
