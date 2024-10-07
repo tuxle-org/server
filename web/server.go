@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"gorm.io/gorm"
 )
 
 // Upgrades an HTTP server connection to the WebSocket protocol.
@@ -15,7 +16,7 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func ServeHTTP(port int) error {
+func ServeHTTP(db *gorm.DB, port int) error {
 	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
 		conn, err := upgrader.Upgrade(writer, request, nil)
 		if err != nil {
@@ -24,7 +25,7 @@ func ServeHTTP(port int) error {
 		}
 
 		defer conn.Close()
-		for HandleWebsocketConn(conn) == nil {
+		for HandleWebsocketConn(db, conn) == nil {
 		}
 	})
 

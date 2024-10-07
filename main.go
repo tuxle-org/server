@@ -43,7 +43,7 @@ func Program(in parsex.Input, args ...string) error {
 		return err
 	}
 
-	return terr.Prefix("Running HTTP server", web.ServeHTTP(port))
+	return terr.Prefix("Running HTTP server", web.ServeHTTP(db, port))
 }
 
 var CLI = parsex.New("example", Program, []parsex.Arg{

@@ -8,11 +8,12 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/tuxle-org/lib/tuxle/protocol"
 	"github.com/tuxle-org/server/tuxle"
+	"gorm.io/gorm"
 )
 
 var CloseConn = errors.New("")
 
-func HandleWebsocketConn(conn *websocket.Conn) error {
+func HandleWebsocketConn(db *gorm.DB, conn *websocket.Conn) error {
 	msgType, msgBody, err := conn.ReadMessage()
 	if err != nil {
 		return err
@@ -34,7 +35,7 @@ func HandleWebsocketConn(conn *websocket.Conn) error {
 			return write(conn, protocol.ErrLetter{Body: err.Error()})
 		}
 
-		response := tuxle.Handle(conn, letter)
+		response := tuxle.Handle(db, conn, letter)
 		if response == nil {
 			return write(conn, protocol.OkayLetter{})
 		}
