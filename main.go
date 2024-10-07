@@ -34,7 +34,12 @@ func Program(in parsex.Input, args ...string) error {
 		return terr.Prefix("Converting port argument into number", err)
 	}
 
-	if err = openDB(); err != nil {
+	db, err := openDB()
+	if err != nil {
+		return err
+	}
+
+	if err = setupDB(db); err != nil {
 		return err
 	}
 
@@ -54,14 +59,14 @@ func main() {
 	}
 }
 
-func openDB() error {
+func openDB() (*gorm.DB, error) {
 	if err := tuxle.MakeDirs(); err != nil {
-		return terr.Prefix("Making tuxle dirs", err)
+		return nil, terr.Prefix("Making tuxle dirs", err)
 	}
 
 	db, err := gorm.Open(sqlite.Open(tuxle.DbFile), new(gorm.Config))
 	if err != nil {
-		return terr.Prefix("Opening database", err)
+		return nil, terr.Prefix("Opening database", err)
 	}
 
 	err = db.AutoMigrate(
@@ -76,9 +81,28 @@ func openDB() error {
 		new(entities.TextMessage),
 	)
 	if err != nil {
-		return terr.Prefix("Running migrations", err)
+		return nil, terr.Prefix("Running migrations", err)
 	}
 
 	slog.Info("Opened database", "file", tuxle.DbFile)
+	return db, nil
+}
+
+func setupDB(db *gorm.DB) error {
+	slog.Debug("Ensuring default Server configuration exists...")
+
+	var server = entities.Server{
+		Name:        "Unnamed Server",
+		Description: "Welcome!",
+		Rules:       "",
+		IconURI:     nil,
+		BannerURI:   nil,
+		OwnerId:     0,
+		Region:      "US:en",
+	}
+	if err := db.FirstOrCreate(&server).Error; err != nil {
+		return terr.Prefix("SELECT Server", err)
+	}
+
 	return nil
 }
